@@ -217,4 +217,4 @@ $RECYCLE.BIN/
 /.idea
 /source/*
 !/source/.gitkeep
-/dist
+/dest
