@@ -9,7 +9,6 @@ const rimraf = require('rimraf');
 const fs = require('fs-extra');
 const globby = require('globby');
 const prettyBytes = require('pretty-bytes');
-const browser = require('browser-sync');
 const customProperties = require('postcss-custom-properties');
 const nested = require('postcss-nested');
 const importCss = require('postcss-import');
@@ -39,6 +38,9 @@ const imageminPlugins = [
 ];
 
 gulp.task('clean', cb => rimraf(path.dest, {}, cb));
+
+gulp.task('copy', () => gulp.src(path.source + filepattern.image)
+  .pipe(gulp.dest(`${path.dest}_source/`)));
 
 gulp.task('imagemin', () => gulp.src(path.source + filepattern.image)
   .pipe(imagemin(imageminPlugins, { verbose: true }))
@@ -91,17 +93,6 @@ gulp.task('style', () => gulp.src(path.lib + filepattern.style)
   ]))
   .pipe(gulp.dest(path.dest)));
 
-gulp.task('server', () => browser.init(null, {
-  notify: false,
-  port: 9753,
-  server: {
-    baseDir: ['dest'],
-    routes: {
-      '/source/': 'source',
-    },
-  },
-}));
-
 gulp.task('compress', cb => runSequence(
   'clean',
   'imagemin',
@@ -111,7 +102,7 @@ gulp.task('compress', cb => runSequence(
 
 gulp.task('default', cb => runSequence(
   'compress',
+  'copy',
   ['view', 'style'],
-  'server',
   cb,
 ));
