@@ -29,6 +29,10 @@ body {
     padding: 0 5rem;
 }
 
+.Info__header {
+    text-align: center;
+}
+
 .Diff {
     padding: 0;
 }

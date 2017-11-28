@@ -17,6 +17,8 @@ const customMedia = require('postcss-custom-media');
 const cssFixes = require('postcss-fixes');
 const autoprefixer = require('autoprefixer');
 
+const config = require('./config');
+
 const filepattern = {
   image: '**/*.{jpg,gif,png,svg}',
   view: '**/*.ejs',
@@ -29,21 +31,11 @@ const path = {
 };
 
 const imageminPlugins = [
-  // https://www.npmjs.com/package/imagemin-pngquant
-  pngquant({
-    quality: '65-80',
-    speed: 1,
-    floyd: 0,
-    verbose: true,
-  }),
-  // https://www.npmjs.com/package/imagemin-mozjpeg
-  mozjpeg({
-    quality: 85,
-  }),
-  // https://github.com/svg/svgo#what-it-can-do
-  imagemin.svgo(),
+  pngquant(config.png),
   imagemin.optipng(),
-  imagemin.gifsicle({ optimizationLevel: 3 }),
+  mozjpeg(config.jpg),
+  imagemin.svgo(config.svg),
+  imagemin.gifsicle(config.gif),
 ];
 
 gulp.task('clean', cb => rimraf(path.dest, {}, cb));
