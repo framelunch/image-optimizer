@@ -1,0 +1,104 @@
+@import "sanitize.css";
+
+html {
+    font-size: 62.5%;
+}
+
+body {
+    font-size: 1.4rem;
+    letter-spacing: 0.1em;
+}
+
+.Header {
+    width: 100%;
+}
+
+.Header__header {
+    width: 100%;
+    text-align: center;
+}
+
+.Header__button {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #fff;
+}
+
+.Info {
+    padding: 0 5rem;
+}
+
+.Diff {
+    padding: 0;
+}
+
+.Diff__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.Diff__cell-header {
+    margin: 2em 0 0;
+    padding: 1em;
+    background: #000;
+    color: #fff;
+    text-align: center;
+
+    &.-light {
+        background: #999;
+    }
+
+    &.-heavy {
+        background: #d30;
+        color: #fff;
+    }
+}
+
+.Diff__cell-header-info {
+    display: block;
+    margin-top: 0.5em;
+    font-size: 0.8em;
+}
+
+.Diff__images {
+    display: flex;
+    justify-content: space-between;
+}
+
+.Diff__before,
+.Diff__after {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 50%;
+    margin: 0;
+    padding: 20px;
+}
+
+.-column {
+    .Diff__images {
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .Diff__before,
+    .Diff__after {
+        width: 100%;
+    }
+}
+
+.Diff__before {
+    background: #fdd;
+}
+
+.Diff__after {
+    background: #cfd;
+}
+
+.Diff__image {
+    width: auto;
+    max-width: 100%;
+    background: #fff;
+}

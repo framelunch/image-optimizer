@@ -1,6 +1,7 @@
 const gulp = require('gulp');
 const imagemin = require('gulp-imagemin');
 const ejs = require('gulp-ejs');
+const postcss = require('gulp-postcss');
 const runSequence = require('run-sequence');
 const mozjpeg = require('imagemin-mozjpeg');
 const pngquant = require('imagemin-pngquant');
@@ -9,10 +10,17 @@ const fs = require('fs-extra');
 const globby = require('globby');
 const prettyBytes = require('pretty-bytes');
 const browser = require('browser-sync');
+const customProperties = require('postcss-custom-properties');
+const nested = require('postcss-nested');
+const importCss = require('postcss-import');
+const customMedia = require('postcss-custom-media');
+const cssFixes = require('postcss-fixes');
+const autoprefixer = require('autoprefixer');
 
 const filepattern = {
   image: '**/*.{jpg,gif,png,svg}',
   view: '**/*.ejs',
+  style: '**/*.css',
 };
 const path = {
   source: './source/',
@@ -68,11 +76,27 @@ gulp.task('createinfo', cb => {
   cb();
 });
 
-gulp.task('view', () => gulp.src(path.lib + filepattern.view)
-  .pipe(ejs({
-    fileinfo: JSON.parse(fs.readFileSync(`${path.dest}info.json`)),
-    sourcePath: path.source,
-  }, {}, { ext: '.html' }))
+gulp.task('view', () => {
+  const fileinfo = JSON.parse(fs.readFileSync(`${path.dest}info.json`));
+  const avarageRatio = Math.round(fileinfo.reduce((tmp, { compressRatio }) => tmp += compressRatio, 0) / fileinfo.length * 100) / 100;
+  gulp.src(path.lib + filepattern.view)
+    .pipe(ejs({
+      fileinfo,
+      avarageRatio,
+      sourcePath: path.source,
+    }, {}, { ext: '.html' }))
+    .pipe(gulp.dest(path.dest));
+});
+
+gulp.task('style', () => gulp.src(path.lib + filepattern.style)
+  .pipe(postcss([
+    importCss,
+    customProperties,
+    customMedia,
+    nested,
+    cssFixes,
+    autoprefixer,
+  ]))
   .pipe(gulp.dest(path.dest)));
 
 gulp.task('server', () => browser.init(null, {
@@ -86,11 +110,16 @@ gulp.task('server', () => browser.init(null, {
   },
 }));
 
-gulp.task('default', cb => runSequence(
+gulp.task('compress', cb => runSequence(
   'clean',
   'imagemin',
   'createinfo',
-  'view',
+  cb,
+));
+
+gulp.task('default', cb => runSequence(
+  'compress',
+  ['view', 'style'],
   'server',
   cb,
 ));
