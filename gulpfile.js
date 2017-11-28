@@ -1,16 +1,22 @@
 const gulp = require('gulp');
-const runSequence = require('run-sequence');
 const imagemin = require('gulp-imagemin');
+const ejs = require('gulp-ejs');
+const runSequence = require('run-sequence');
 const mozjpeg = require('imagemin-mozjpeg');
 const pngquant = require('imagemin-pngquant');
 const rimraf = require('rimraf');
 const fs = require('fs-extra');
 const globby = require('globby');
 const prettyBytes = require('pretty-bytes');
+const browser = require('browser-sync');
 
-const filepattern = '**/*.{jpg,gif,png,svg}';
+const filepattern = {
+  image: '**/*.{jpg,gif,png,svg}',
+  view: '**/*.ejs',
+};
 const path = {
   source: './source/',
+  lib: './lib/',
   dest: './dest/',
 };
 
@@ -34,12 +40,12 @@ const imageminPlugins = [
 
 gulp.task('clean', cb => rimraf(path.dest, {}, cb));
 
-gulp.task('imagemin', () => gulp.src(path.source + filepattern)
+gulp.task('imagemin', () => gulp.src(path.source + filepattern.image)
   .pipe(imagemin(imageminPlugins, { verbose: true }))
   .pipe(gulp.dest(path.dest)));
 
 gulp.task('createinfo', cb => {
-  const info = globby.sync(path.source + filepattern)
+  const info = globby.sync(path.source + filepattern.image)
     .reduce((tmpInfo, filename) => {
       const removeSourceDirName = filename.replace(new RegExp(path.source), '');
       const destname = path.dest + removeSourceDirName;
@@ -50,6 +56,9 @@ gulp.task('createinfo', cb => {
         filename: removeSourceDirName,
         sourceByteSize,
         destByteSize,
+        sourceSize: prettyBytes(sourceByteSize),
+        destSize: prettyBytes(destByteSize),
+        compressRatio: Math.round((destByteSize / sourceByteSize) * 10000) / 100,
       });
       return tmpInfo;
     }, []);
@@ -59,9 +68,29 @@ gulp.task('createinfo', cb => {
   cb();
 });
 
+gulp.task('view', () => gulp.src(path.lib + filepattern.view)
+  .pipe(ejs({
+    fileinfo: JSON.parse(fs.readFileSync(`${path.dest}info.json`)),
+    sourcePath: path.source,
+  }, {}, { ext: '.html' }))
+  .pipe(gulp.dest(path.dest)));
+
+gulp.task('server', () => browser.init(null, {
+  notify: false,
+  port: 9753,
+  server: {
+    baseDir: ['dest'],
+    routes: {
+      '/source/': 'source',
+    },
+  },
+}));
+
 gulp.task('default', cb => runSequence(
   'clean',
   'imagemin',
   'createinfo',
+  'view',
+  'server',
   cb,
 ));
