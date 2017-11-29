@@ -97,12 +97,12 @@ gulp.task('compress', cb => runSequence(
   'clean',
   'imagemin',
   'createinfo',
-  cb,
+  cb
 ));
 
 gulp.task('default', cb => runSequence(
   'compress',
   'copy',
   ['view', 'style'],
-  cb,
+  cb
 ));
