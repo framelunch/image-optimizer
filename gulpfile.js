@@ -30,7 +30,7 @@ const path = {
 };
 
 const imageminPlugins = [
-  pngquant(config.png),
+  pngquant(Object.assign({}, config.png, { verbose: true })),
   imagemin.optipng(),
   mozjpeg(config.jpg),
   imagemin.svgo(config.svg),
@@ -60,7 +60,7 @@ gulp.task('createinfo', cb => {
         destByteSize,
         sourceSize: prettyBytes(sourceByteSize),
         destSize: prettyBytes(destByteSize),
-        compressRatio: Math.round((destByteSize / sourceByteSize) * 10000) / 100,
+        compressRatio: (10000 - Math.round((destByteSize / sourceByteSize) * 10000)) / 100,
       });
       return tmpInfo;
     }, []);
